@@ -18,8 +18,16 @@ def estimate_pe(M, SNRdb, Nsamples):
     for symbol in symbols:
         noise = np.random.normal(0, np.sqrt(N0/2), 1)
         received = symbol + noise
-        if received > symbol + d/2 or received < symbol - d/2:
-            errors += 1
+        if symbol == d*(-(M-1)/2):
+            if received > symbol + d/2:
+                errors += 1
+        elif symbol == d*(M-1)/2:
+            if received < symbol - d/2:
+                errors += 1
+        else:
+            if received > symbol + d/2 or received < symbol - d/2:
+                errors += 1
+
     return errors/Nsamples
 
 def montecarlo_pe_vs_snr(M, SNRmax, Nsamples):
@@ -36,14 +44,14 @@ def theorical_pe_vs_snr(M, SNRmax):
     
     SNRs = list(range(SNRmax+1))
 
-    return SNRs, [2*(1-1/M)*Q(np.sqrt(6*np.log2(M)*(10**(SNR/10))/(M**2-1)),M) for SNR in SNRs]
+    return SNRs, [2*(1-1/M)*Q(np.sqrt(6*np.log2(M)*(10**(SNR/10))/(M**2-1))) for SNR in SNRs]
 
-def Q(q,M): # corrijo factor de la Q
+def Q(q): # corrijo factor de la Q
 
-    return (1+2/M)*(1 - NormalDist(mu=0, sigma=1).cdf(q))
+    return 1 - NormalDist(mu=0, sigma=1).cdf(q)
 
 
-Nsamples = 1e5 # aumento para tener mayor precision
+Nsamples = 1e3 # aumento para tener mayor precision
 SNRmax = 10
 
 varios_M = [2,4,8,16]
@@ -62,4 +70,4 @@ plt.ylabel('log(Probabilidad de error)')
 plt.legend()
 plt.grid()
 plt.savefig('results/PAM.png')
-#plt.show()
+plt.show()
