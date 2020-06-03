@@ -20,7 +20,6 @@ def estimate_pe(M, SNRdb, Nsamples):
         received = symbol + noise
         if received > symbol + d/2 or received < symbol - d/2:
             errors += 1
-
     return errors/Nsamples
 
 def montecarlo_pe_vs_snr(M, SNRmax, Nsamples):
@@ -40,22 +39,27 @@ def theorical_pe_vs_snr(M, SNRmax):
     return SNRs, [2*(1-1/M)*Q(np.sqrt(6*np.log2(M)*(10**(SNR/10))/(M**2-1))) for SNR in SNRs]
 
 def Q(q):
-    return 2*(1 - NormalDist(mu=0, sigma=1).cdf(q))
+
+    return 1 - NormalDist(mu=0, sigma=1).cdf(q)
 
 
-Nsamples = 10e3
-M = 16
+Nsamples = 1e4
 SNRmax = 10
 
-SNRs_montecarlo, pe_montecarlo = montecarlo_pe_vs_snr(M, SNRmax, Nsamples)
-SNRs_theorical, pe_theorical = theorical_pe_vs_snr(M, SNRmax)
+varios_M = [2,4,8,16]
 
-plt.plot(SNRs_montecarlo, np.log(pe_montecarlo), label='Estimación')
-plt.plot(SNRs_theorical, np.log(pe_theorical), label='Teórica')
-plt.title(f'Probabilidad de error para {M}-PAM')
+for M in varios_M:
+    SNRs_estimacion, pe_estimada = montecarlo_pe_vs_snr(M, SNRmax, Nsamples)
+    SNRs_teoricas, pe_teorica = theorical_pe_vs_snr(M, SNRmax)
+
+    plt.plot(SNRs_teoricas, pe_teorica, label='Teórica M= %d' %M,color='r',zorder=1)
+    plt.scatter(SNRs_estimacion, pe_estimada, label='Estimación M = %d' %M,zorder=2)
+    
+plt.title('Probabilidad de error para PAM')
+plt.yscale('log')
 plt.xlabel('SNR [dB]')
 plt.ylabel('log(Probabilidad de error)')
 plt.legend()
 plt.grid()
-plt.savefig('results/PAM.png')
+#plt.savefig('results/PAM.png')
 plt.show()
