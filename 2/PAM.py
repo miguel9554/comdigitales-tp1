@@ -36,14 +36,14 @@ def theorical_pe_vs_snr(M, SNRmax):
     
     SNRs = list(range(SNRmax+1))
 
-    return SNRs, [2*(1-1/M)*Q(np.sqrt(6*np.log2(M)*(10**(SNR/10))/(M**2-1))) for SNR in SNRs]
+    return SNRs, [2*(1-1/M)*Q(np.sqrt(6*np.log2(M)*(10**(SNR/10))/(M**2-1)),M) for SNR in SNRs]
 
-def Q(q):
+def Q(q,M): # corrijo factor de la Q
 
-    return 1 - NormalDist(mu=0, sigma=1).cdf(q)
+    return (1+2/M)*(1 - NormalDist(mu=0, sigma=1).cdf(q))
 
 
-Nsamples = 1e4
+Nsamples = 1e5 # aumento para tener mayor precision
 SNRmax = 10
 
 varios_M = [2,4,8,16]
@@ -61,5 +61,5 @@ plt.xlabel('SNR [dB]')
 plt.ylabel('log(Probabilidad de error)')
 plt.legend()
 plt.grid()
-#plt.savefig('results/PAM.png')
-plt.show()
+plt.savefig('results/PAM.png')
+#plt.show()
