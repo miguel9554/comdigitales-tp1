@@ -10,7 +10,7 @@ def estimate_pam_pe(M, SNRdb, Nsamples):
 
     # Obtenemos N0
     SNRveces = 10**(SNRdb/10)
-    Eb = d**2*(M*+2-1)/(12*np.log2(M))
+    Eb = d**2*(M**2-1)/(12*np.log2(M))
     N0 = Eb/SNRveces
 
     errors = 0
@@ -27,9 +27,9 @@ def Q(q):
     return 2*(1 - NormalDist(mu=0, sigma=1).cdf(q))
 
 
-Nsamples = 100e3
-M = 16
-SNRmax = 100
+Nsamples = 10e3
+M = 2
+SNRmax = 10
 
 SNRs = range(SNRmax+1)
 pe_vec = []
@@ -41,7 +41,7 @@ pe_teorica = [2*(1-1/M)*Q(np.sqrt(6*np.log2(M)*(10**(SNR/10))/(M**2-1))) for SNR
 
 plt.plot(SNRs, np.log(pe_vec), label='Estimación')
 plt.plot(SNRs, np.log(pe_teorica), label='Teórica')
-plt.title('Probabilidad de error para PAM')
+plt.title(f'Probabilidad de error para {M}-PAM')
 plt.xlabel('SNR [dB]')
 plt.ylabel('log(Probabilidad de error)')
 plt.legend()
