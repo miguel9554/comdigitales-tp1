@@ -2,7 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from statistics import NormalDist
 
-def estimate_pam_pe(M, SNRdb, Nsamples):
+def estimate_pe(M, SNRdb, Nsamples):
 
     d = 2
     # Generamos los símbolos
@@ -22,25 +22,36 @@ def estimate_pam_pe(M, SNRdb, Nsamples):
             errors += 1
 
     return errors/Nsamples
+
+def montecarlo_pe_vs_snr(M, SNRmax, Nsamples):
+
+    SNRs = range(SNRmax+1)
+    pe_vec = []
+
+    for SNR in SNRs:
+        pe_vec.append(estimate_pe(M, SNR, Nsamples))
+
+    return SNRs, pe_vec
+
+def theorical_pe_vs_snr(M, SNRmax):
     
+    SNRs = list(range(SNRmax+1))
+
+    return SNRs, [2*(1-1/M)*Q(np.sqrt(6*np.log2(M)*(10**(SNR/10))/(M**2-1))) for SNR in SNRs]
+
 def Q(q):
     return 2*(1 - NormalDist(mu=0, sigma=1).cdf(q))
 
 
 Nsamples = 10e3
-M = 2
+M = 16
 SNRmax = 10
 
-SNRs = range(SNRmax+1)
-pe_vec = []
+SNRs_montecarlo, pe_montecarlo = montecarlo_pe_vs_snr(M, SNRmax, Nsamples)
+SNRs_theorical, pe_theorical = theorical_pe_vs_snr(M, SNRmax)
 
-for SNR in SNRs:
-    pe_vec.append(estimate_pam_pe(M, SNR, Nsamples))
-
-pe_teorica = [2*(1-1/M)*Q(np.sqrt(6*np.log2(M)*(10**(SNR/10))/(M**2-1))) for SNR in SNRs]
-
-plt.plot(SNRs, np.log(pe_vec), label='Estimación')
-plt.plot(SNRs, np.log(pe_teorica), label='Teórica')
+plt.plot(SNRs_montecarlo, np.log(pe_montecarlo), label='Estimación')
+plt.plot(SNRs_theorical, np.log(pe_theorical), label='Teórica')
 plt.title(f'Probabilidad de error para {M}-PAM')
 plt.xlabel('SNR [dB]')
 plt.ylabel('log(Probabilidad de error)')
