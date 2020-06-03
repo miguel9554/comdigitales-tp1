@@ -20,9 +20,8 @@ def estimate_pam_pe(M, SNRdb, Nsamples):
         received = symbol + noise
         if received > symbol + d/2 or received < symbol - d/2:
             errors += 1
-
     return errors/Nsamples
-    
+
 def Q(q):
     return 1 - NormalDist(mu=0, sigma=1).cdf(q)
 
@@ -39,10 +38,11 @@ for M in varios_M:
     pe_vec = []
     for SNR in SNRs:
         pe_vec.append(estimate_pam_pe(M, SNR, Nsamples))
-    plt.plot(SNRs, np.log(pe_teorica), label='Teórica M= %d' %M,color='r',zorder=1)
-    plt.scatter(SNRs, np.log(pe_vec), label='Estimación M = %d' %M,zorder=2)
+    plt.plot(SNRs, pe_teorica, label='Teórica M= %d' %M,color='r',zorder=1)
+    plt.scatter(SNRs, pe_vec, label='Estimación M = %d' %M,zorder=2)
     
 plt.title('Probabilidad de error para PAM')
+plt.yscale('log')
 plt.xlabel('SNR [dB]')
 plt.ylabel('log(Probabilidad de error)')
 plt.legend()
