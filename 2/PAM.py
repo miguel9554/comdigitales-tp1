@@ -10,7 +10,11 @@ class PAM:
         self.average_energy = (M**2-1)*pulse_energy/3
         self.bit_energy = self.average_energy/np.log2(M)
         self.min_distance = 2*np.sqrt(pulse_energy)
-        self.symbols = [(2*m+1-M)*pulse_energy for m in range(self.M)]
+        amplitudes = [2*m+1-M for m in range(M)]
+        # Matriz cuyas filas son las coordenadas de cada símbolo
+        # Es de MxN (M órden de la constelación, N dimensión)
+        self.symbols = np.matrix([[amplitude*np.sqrt(pulse_energy)] for amplitude in amplitudes])
+        self.symbols_energy = np.matrix([[amplitude**2*pulse_energy] for amplitude in amplitudes])
 
     def estimate_pe(self, SNRdb, iterations):
 
@@ -18,20 +22,19 @@ class PAM:
         SNRveces = 10**(SNRdb/10)
         N0 = self.bit_energy/SNRveces
 
+        # Envíamos símbolos al azar y les agregamos ruido, detectamos lo recibido
+        # y contamos los errores
         errors = 0
-
-        for symbol in random.choices(self.symbols, k=iterations):
+        for sent in random.choices(self.symbols, k=iterations):
             noise = np.random.normal(0, np.sqrt(N0/2), 1)
-            received = symbol + noise
-            if symbol == self.min_distance*(-(self.M-1)/2):
-                if received > symbol + self.min_distance/2:
-                    errors += 1
-            elif symbol == self.min_distance*(self.M-1)/2:
-                if received < symbol - self.min_distance/2:
-                    errors += 1
-            else:
-                if received > symbol + self.min_distance/2 or received < symbol - self.min_distance/2:
-                    errors += 1
+            received = sent + noise
+
+            # Detectamos
+            correlator_output = self.symbols*received
+            bias = N0/2*np.log(1/self.M)-self.symbols_energy/2
+            detected = self.symbols[np.argmax(correlator_output+bias)]
+            if detected != sent:
+                errors += 1
 
         return errors/iterations
 
