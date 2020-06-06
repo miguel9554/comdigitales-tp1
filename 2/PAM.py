@@ -6,15 +6,17 @@ import random
 class PAM:
     def __init__(self, M: int, pulse_energy: float):
         self.M = M
+        # Cantidades asociadas a la energía
         self.pulse_energy = pulse_energy
         self.average_energy = (M**2-1)*pulse_energy/3
         self.bit_energy = self.average_energy/np.log2(M)
         self.min_distance = 2*np.sqrt(pulse_energy)
-        amplitudes = [2*m+1-M for m in range(M)]
-        # Matriz cuyas filas son las coordenadas de cada símbolo
+        # Construimos los símbolos
+        # Representamos los símbolos con una matriz cuyas filas son las coordenadas de cada símbolo
         # Es de MxN (M órden de la constelación, N dimensión)
+        amplitudes = [2*m+1-M for m in range(M)]
         self.symbols = np.matrix([[amplitude*np.sqrt(pulse_energy)] for amplitude in amplitudes])
-        self.symbols_energy = np.matrix([[amplitude**2*pulse_energy] for amplitude in amplitudes])
+        self.symbols_energy = np.matrix([ [x] for x in np.linalg.norm(self.symbols, axis=-1)**2])
 
     def estimate_pe(self, SNRdb, iterations):
 
@@ -54,7 +56,7 @@ class PAM:
 
         return SNRs, [2*(1-1/self.M)*Q(np.sqrt(6*np.log2(self.M)*(10**(SNR/10))/(self.M**2-1))) for SNR in SNRs]
 
-def Q(q): # corrijo factor de la Q
+def Q(q):
 
     return 1 - NormalDist(mu=0, sigma=1).cdf(q)
 
