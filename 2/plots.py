@@ -5,6 +5,7 @@ import random
 from QAM import QAM
 from PAM import PAM
 from PSK import PSK
+from FSK import FSK
 
 def generate_plot(constellation, Nsamples, SNRmax, Ms):
 
@@ -30,12 +31,13 @@ def generate_plot(constellation, Nsamples, SNRmax, Ms):
 
 def main():
 
-    Nsamples = int(1e3)
+    Nsamples = int(1e4)
     SNRmax = 10
     pulse_energy = 1
-    varios_M = [2, 4,8,16]
-    #generate_plot(PAM(4,1), Nsamples, SNRmax, varios_M)
-    generate_plot(PSK(4,1), Nsamples, SNRmax, varios_M)
+    varios_M = [2,4,8,16]
+    #generate_plt(PAM(4,1), Nsamples, SNRmax, varios_M)
+    #generate_plot(PSK(4,1), Nsamples, SNRmax, varios_M)
+    generate_plot(FSK(4,1), Nsamples, SNRmax, varios_M)
     varios_M = [4,8,16]
     #generate_plot(QAM(4,1), Nsamples, SNRmax, varios_M)
 
