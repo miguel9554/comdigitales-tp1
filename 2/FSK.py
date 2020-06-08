@@ -25,3 +25,12 @@ class FSK(constellation):
     def theorical_pe(self, SNR):
         return (self.M-1)*Q(np.sqrt(np.log2(self.M)*10**(SNR/10)))
 
+    def symbol_to_code(self, symbol):
+        if type(symbol) == np.matrix:
+            symbol = np.asarray(symbol).reshape(-1)
+        index = np.argmax(symbol)
+        code = f"{index:0{int(np.log2(self.M))}b}" 
+        return code
+
+    def theorical_pb(self, SNR):
+        return self.theorical_pe(SNR)*self.M/(2*(self.M-1))
