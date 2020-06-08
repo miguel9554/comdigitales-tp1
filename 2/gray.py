@@ -11,10 +11,10 @@ def gray_coding_pam(code: str, bits: int) -> List[int]:
     elif bits > 1:
         return [(1-2*int(code[0]))*(2**(bits-1)+gray_coding_pam(code[1:], bits-1)[0])]
 
-def gray_coding_qam(code: str, bits_i: int, bits_q: int) -> Tuple[int, int]:
-    i_value = gray_coding_pam(code[:bits_i], bits_i)
-    q_value = gray_coding_pam(code[bits_i:], bits_q)
-    return (i_value, q_value)
+def gray_coding_qam(code: str, bits_i: int, bits_q: int) -> List[int]:
+    i_value = gray_coding_pam(code[:bits_i], bits_i)[0]
+    q_value = gray_coding_pam(code[bits_i:], bits_q)[0]
+    return [i_value, q_value]
 
 def different_bits(code1: str, code2: str) -> int:
     return sum(1 for a, b in zip(code1, code2) if a != b)
