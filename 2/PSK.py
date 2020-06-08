@@ -4,6 +4,7 @@ from statistics import NormalDist
 import random
 from constellation import constellation
 from utils import Q
+from gray import psk_table
 
 class PSK(constellation):
     def __init__(self, M: int, pulse_energy: float):
@@ -22,6 +23,7 @@ class PSK(constellation):
         self.symbols_energy = np.matrix([ [x] for x in np.linalg.norm(self.symbols, axis=-1)**2])
         self.N = 2
         self.name = "PSK"
+        self.symbol_to_code_table = psk_table(np.log2(M))
 
     def theorical_pe(self, SNR):
         
@@ -30,3 +32,14 @@ class PSK(constellation):
         else:
             return 2*Q(np.sqrt(2*np.log2(self.M)*np.sin(np.pi/self.M)**2*10**(SNR/10)))
 
+    def symbol_to_code(self, symbol):
+        if type(symbol) == np.matrix:
+            symbol = np.asarray(symbol).reshape(-1)
+        theta = np.arctan2(symbol[1], symbol[0])
+        # Pasamos de -pi, pi a 0, 2pi
+        theta = (2*np.pi + theta) * (theta < 0) + theta*(theta >= 0)
+        index = int(theta*self.M/(2*np.pi))
+        return self.symbol_to_code_table[index]
+
+    def theorical_pb(self, SNR):
+        return self.theorical_pe(SNR)/np.log2(self.M)

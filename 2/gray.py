@@ -1,4 +1,5 @@
-from typing import Tuple, List
+from typing import List
+import numpy as np
 
 def gray_coding_pam(code: str, bits: int) -> List[int]:
     if len(code) != bits:
@@ -16,6 +17,44 @@ def gray_coding_qam(code: str, bits_i: int, bits_q: int) -> List[int]:
     q_value = gray_coding_pam(code[bits_i:], bits_q)[0]
     return [i_value, q_value]
 
+def psk_table(n): 
+  
+    # base case 
+    if (n <= 0): 
+        return
+  
+    # 'arr' will store all generated codes 
+    arr = list() 
+  
+    # start with one-bit pattern 
+    arr.append("0") 
+    arr.append("1") 
+  
+    # Every iteration of this loop generates  
+    # 2*i codes from previously generated i codes. 
+    i = 2
+    j = 0
+    while(True): 
+  
+        if np.uint64(i) >= np.uint64(1) << np.uint64(n): 
+            break
+      
+        # Enter the prviously generated codes  
+        # again in arr[] in reverse order.  
+        # Nor arr[] has double number of codes. 
+        for j in range(i - 1, -1, -1): 
+            arr.append(arr[j]) 
+  
+        # append 0 to the first half 
+        for j in range(i): 
+            arr[j] = "0" + arr[j] 
+  
+        # append 1 to the second half 
+        for j in range(i, 2 * i): 
+            arr[j] = "1" + arr[j] 
+        i = i << 1
+  
+    return arr
 def different_bits(code1: str, code2: str) -> int:
     return sum(1 for a, b in zip(code1, code2) if a != b)
 

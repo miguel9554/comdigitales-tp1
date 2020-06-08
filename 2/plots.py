@@ -47,14 +47,14 @@ def generate_pb_plot(constellation, Nsamples, SNRmax, Ms):
 def main():
 
     Nsamples = int(1e3)
-    SNRmax = 50
+    SNRmax = 10
     pulse_energy = 1
     varios_M = [2,4,8,16]
     #generate_pb_plot(PAM(4,1), Nsamples, SNRmax, varios_M)
-    #generate_plot(PSK(4,1), Nsamples, SNRmax, varios_M)
+    generate_pb_plot(PSK(4,1), Nsamples, SNRmax, varios_M)
     #generate_plot(FSK(4,1), Nsamples, SNRmax, varios_M)
     varios_M = [4,8,16]
-    generate_pb_plot(QAM(4,1), Nsamples, SNRmax, varios_M)
+    #generate_pb_plot(QAM(4,1), Nsamples, SNRmax, varios_M)
     #generate_plot(QAM(4,1), Nsamples, SNRmax, varios_M)
 
 if __name__ == "__main__":
