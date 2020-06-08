@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 import random
 from constellation import constellation
 from utils import Q
+from gray import gray_coding_pam
 
 class PAM(constellation):
     def __init__(self, M: int, pulse_energy: float):
@@ -20,7 +21,23 @@ class PAM(constellation):
         self.symbols_energy = np.matrix([ [x] for x in np.linalg.norm(self.symbols, axis=-1)**2])
         self.N = 1
         self.name = "PAM"
+        self.symbol_to_code_table = self.create_symbol_to_code_table()
+
+    def create_symbol_to_code_table(self):
+        table = {}
+        for code in [f"{m:0{int(np.log2(self.M))}b}" for m in range(self.M)]:
+            symbol = gray_coding_pam(code, np.log2(self.M))
+            table[tuple(symbol)] = code
+        return table
+
+    def symbol_to_code(self, symbol):
+        if type(symbol) == np.matrix:
+            symbol = np.asarray(symbol).reshape(-1)
+        return self.symbol_to_code_table[tuple(symbol)]
 
     def theorical_pe(self, SNR):
         return 2*(1-1/self.M)*Q(np.sqrt(6*np.log2(self.M)*(10**(SNR/10))/(self.M**2-1)))
+
+    def theorical_pb(self, SNR):
+        return self.theorical_pe(SNR)/np.log2(self.M)
 
