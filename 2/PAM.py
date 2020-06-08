@@ -26,7 +26,7 @@ class PAM(constellation):
     def create_symbol_to_code_table(self):
         table = {}
         for code in [f"{m:0{int(np.log2(self.M))}b}" for m in range(self.M)]:
-            symbol = gray_coding_pam(code, np.log2(self.M))
+            symbol = [amplitude*np.sqrt(self.pulse_energy) for amplitude in gray_coding_pam(code, np.log2(self.M))]
             table[tuple(symbol)] = code
         return table
 
