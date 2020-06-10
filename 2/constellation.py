@@ -65,7 +65,7 @@ class constellation:
                 code_detected = self.symbol_to_code(detected)
                 wrong_bits += self.different_bits(code_sent, code_detected)
 
-        return wrong_bits/iterations
+        return wrong_bits/(iterations*np.log2(self.M))
 
     def montecarlo_pb_vs_snr(self, SNRmax, iterations):
 
