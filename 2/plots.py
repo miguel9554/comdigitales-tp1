@@ -7,14 +7,15 @@ from PAM import PAM
 from PSK import PSK
 from FSK import FSK
 
-def generate_plot(constellation, Nsamples, SNRmax, Ms, plot_type):
+def generate_plot(constellation, Nsamples, SNRmax, Ms, show_plot, plot_type):
+
+    map_constellation_name = {"QAM": QAM, "PAM": PAM, "PSK": PSK, "FSK": FSK}
 
     for M in Ms:
 
         print(f"Estimando para M={M}...")
 
-        constellation_class = type(constellation)
-        Mconstellation = constellation_class(M, 1)
+        Mconstellation = map_constellation_name[constellation](M, 1)
 
         if plot_type == "pe":
             SNRs_estimacion, pe_estimada = Mconstellation.montecarlo_pe_vs_snr(SNRmax, Nsamples)
@@ -23,7 +24,7 @@ def generate_plot(constellation, Nsamples, SNRmax, Ms, plot_type):
             SNRs_estimacion, pe_estimada = Mconstellation.montecarlo_pb_vs_snr(SNRmax, Nsamples)
             SNRs_teoricas, pe_teorica = Mconstellation.theorical_pb_vs_snr(SNRmax)
 
-        plt.plot(SNRs_teoricas, pe_teorica, label='Teórica M= %d' %M,color='r',zorder=1)
+        plt.plot(SNRs_teoricas, pe_teorica, label='Teórica M= %d' %M,zorder=1)
         plt.scatter(SNRs_estimacion, pe_estimada, label='Estimación M = %d' %M,zorder=2)
     
     if plot_type == "pe":
@@ -36,13 +37,41 @@ def generate_plot(constellation, Nsamples, SNRmax, Ms, plot_type):
     plt.legend()
     plt.grid()
     plt.savefig(f'results/{Mconstellation.name}_{plot_type}.png')
-    plt.show()
+    if show_plot:
+        plt.show()
+    plt.close()
+    plt.clf()
 
-def generate_pe_plot(constellation, Nsamples, SNRmax, Ms):
-    return generate_plot(constellation, Nsamples, SNRmax, Ms, "pe")
+def generate_pe_plot(constellation, Nsamples, SNRmax, Ms, show_plot):
+    return generate_plot(constellation, Nsamples, SNRmax, Ms, show_plot, "pe")
 
-def generate_pb_plot(constellation, Nsamples, SNRmax, Ms):
-    return generate_plot(constellation, Nsamples, SNRmax, Ms, "pb")
+def generate_pb_plot(constellation, Nsamples, SNRmax, Ms, show_plot):
+    return generate_plot(constellation, Nsamples, SNRmax, Ms, show_plot, "pb")
+
+def plot_all_pb(Nsamples, SNRmax, show_plot):
+
+    modulations = {}
+    modulations["QAM"] = QAM(16, 1)
+    modulations["PAM"] = PAM(16, 1)
+    modulations["PSK"] = PSK(16, 1)
+    modulations["FSK"] = FSK(16, 1)
+    for modulation_name in modulations:
+        SNRs_estimacion, pe_estimada = modulations[modulation_name].montecarlo_pb_vs_snr(SNRmax, Nsamples)
+        SNRs_teoricas, pe_teorica = modulations[modulation_name].theorical_pb_vs_snr(SNRmax)
+        plt.plot(SNRs_teoricas, pe_teorica, label=f"{modulation_name} teórica",zorder=1)
+        plt.scatter(SNRs_estimacion, pe_estimada, label=f"{modulation_name} estimada",zorder=2)
+
+    plt.title('Probabilidades de error de bit para M=16')
+    plt.yscale('log')
+    plt.xlabel('SNR [dB]')
+    plt.ylabel('log(Probabilidad de error)')
+    plt.legend()
+    plt.grid()
+    plt.savefig(f'results/all_modulations.png')
+    if show_plot:
+        plt.show()
+    plt.close()
+    plt.clf()
 
 def main():
 
@@ -50,12 +79,25 @@ def main():
     SNRmax = 10
     pulse_energy = 1
     varios_M = [2,4,8,16]
-    #generate_pb_plot(PAM(4,1), Nsamples, SNRmax, varios_M)
-    #generate_pb_plot(PSK(4,1), Nsamples, SNRmax, varios_M)
-    generate_pb_plot(FSK(4,1), Nsamples, SNRmax, varios_M)
+
+    # Graficos de prob de error
+    generate_pe_plot("PAM", Nsamples, SNRmax, varios_M, False)
+    generate_pe_plot("PSK", Nsamples, SNRmax, varios_M, False)
+    generate_pe_plot("FSK", Nsamples, SNRmax, varios_M, False)
     varios_M = [4,8,16]
-    #generate_pb_plot(QAM(4,1), Nsamples, SNRmax, varios_M)
-    #generate_plot(QAM(4,1), Nsamples, SNRmax, varios_M)
+    generate_pe_plot("QAM", Nsamples, SNRmax, varios_M, False)
+
+    varios_M = [2,4,8,16]
+    # Graficos de prob de error de bit
+    generate_pb_plot("PAM", Nsamples, SNRmax, varios_M, False)
+    generate_pb_plot("PSK", Nsamples, SNRmax, varios_M, False)
+    generate_pb_plot("FSK", Nsamples, SNRmax, varios_M, False)
+    varios_M = [4,8,16]
+    generate_pb_plot("QAM", Nsamples, SNRmax, varios_M, False)
+
+    # Graficamos pb para todas
+    plot_all_pb(Nsamples, SNRmax, False)
+
 
 if __name__ == "__main__":
     main()
